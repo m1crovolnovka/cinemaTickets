@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+      xmlns:sec="http://www.thymeleaf.org">
+<head>
+    <title>Мероприятие</title>
+</head>
+<body layout:fragment="body">
+
+<section>
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="row gx-4 gx-lg-5 align-items-center">
+                <div class="col-lg-6 col-md-12"><img class="card-img-top mb-5 mb-md-0" th:src="${movie.photoUrl}" alt="..." /></div>
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bolder" th:text="${movie.title}"></h1>
+                    <div class="fs-5 mb-5">
+                        <p><span th:text="${movie.cost}"></span><span>$</span></p>
+                        <p th:text="${movie.started}"></p>
+                        <p th:text="${movie.place}"></p>
+                    </div>
+                    <div class="d-flex">
+                        <div th:if="${user.id} == ${null}">
+                            <a class="btn btn-outline-dark flex-shrink-0" style="margin-right: 5px" type="button" th:href="@{/login}">
+                                Войти
+                            </a>
+                        </div>
+                        <div sec:authorize="isAuthenticated()&&!hasAuthority('ADMIN')" th:if="${user.id} != ${null}">
+                        <a class="btn btn-outline-dark flex-shrink-0" style="margin-right: 5px" type="button" th:href="@{/movies/{movieId}/tickets(movieId=${movie.id})}">
+                            <i class="bi-cart-fill me-1"></i>
+                            Выбрать место
+                        </a>
+                        </div>
+                        <div sec:authorize="hasAuthority('ADMIN')" style="margin-right: 5px">
+                            <a class="btn btn-outline-danger flex-shrink-0" type="button" th:href="@{/movies/{movieId}/delete(movieId=${movie.id})}">
+                            Удалить
+                        </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background-color: #DCDCDC; border-radius: 20px; margin-top: 20px">
+                    <h1>Описание</h1>
+                <br><p style="font-size: 20px" class="lead" th:text="${movie.content}"></p></br>
+                </div>
+                <p></p>
+                </div>
+            </div>
+    </section>
+</section>
+
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>Prime Hall</title>
+</head>
+<body layout:fragment="body">
+<style>
+  .stage {
+    background-color: #d3d3d3;
+    text-align: center;
+    padding: 20px;
+    font-weight: bold;
+  }
+  .button-section {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-section {
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+  }
+  .balcony12{
+    height: 400px;
+  }
+  .dance-floor {
+    height: 400px;
+    font-size: 50px;
+  }
+  .balcony {
+    height: 90px;
+  }
+</style>
+<section class="py-5">
+  <div class="container px-4 px-lg-5 my-5">
+    <div class="row gx-4 gx-lg-5 align-items-center" style="border: black;background-color: #DCDCDC;border-radius: 20px">
+      <div class="col-md-3"><img class="card-img-top mb-1 mb-md-1" style="border-radius: 20px" th:src="${movie.photoUrl}" alt="..." /></div>
+      <div class="col-md-6">
+        <h3 class="display-5 fw-bolder" th:text="${movie.title}"></h3>
+        <div class="fs-5 mb-5">
+          <p><span th:text="${movie.cost}"></span><span>$</span></p>
+          <p th:text="${movie.started}"></p>
+          <p th:text="${movie.place}"></p>
+        </div>
+      </div>
+      </div>
+  </div>
+  <div class="container text-center mt-4 border-dark" >
+    <div class="row">
+      <div class="col-12 stage">Сцена</div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-2 d-flex align-items-center justify-content-center balcony12">
+        <a th:if="${Balcony1}" class="btn btn-danger button-section" th:href="@{/movies/{movieId}/tickets/{sector}(movieId=${movieId}, sector='Balcony1')}">Балкон 1</a>
+        <span th:if="${!Balcony1}" class="btn btn-dark button-section">Балкон 1</span>
+      </div>
+      <div class="col-8">
+        <a th:if="${Dancefloor}" class="btn btn-danger button-section dance-floor" th:href="@{/movies/{movieId}/tickets/{sector}(movieId=${movieId}, sector='Dancefloor')}">ТАНЦПОЛ</a>
+        <span th:if="${!Dancefloor}" class="btn btn-dark button-section dance-floor">ТАНЦПОЛ</span>
+      </div>
+      <div class="col-2 d-flex align-items-center justify-content-center">
+        <a th:if="${Balcony2}" class="btn btn-danger button-section balcony12" th:href="@{/movies/{movieId}/tickets/{sector}(movieId=${movieId}, sector='Balcony2')}">Балкон 2</a>
+        <span th:if="${!Balcony2}" class="btn btn-dark button-section balcony12">Балкон 2</span>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12 d-flex justify-content-center">
+        <a th:if="${Balcony3}" class="btn btn-danger button-section w-50 balcony" th:href="@{/movies/{movieId}/tickets/{sector}(movieId=${movieId}, sector='Balcony3')}">Балкон 3</a>
+        <span th:if="${!Balcony3}" class="btn btn-dark button-section w-50 balcony">Балкон 3</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

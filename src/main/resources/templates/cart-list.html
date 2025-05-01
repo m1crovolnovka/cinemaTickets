@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Корзина</title>
+</head>
+<body layout:fragment="body">
+
+<!-- Section-->
+
+<section class="py-5">
+
+    <div class="container ">
+
+        <div  class=" justify-content-center">
+
+
+            <div th:each="ticket :${tickets}"  style="margin-bottom: 10px" >
+                <div class="card h-100">
+                    <!-- Product image-->
+                    <div class="d-flex align-items-center">
+                        <img height="200px" class="card-img-left " th:src="${ticket.movie.photoUrl}" style="border-radius: 5px" alt="..." />
+
+                    <!-- Product details-->
+                    <div class="card-body p-4" >
+                        <div class="text-center">
+                            <!-- Product name-->
+                            <h5 class="fw-bolder" th:text="${ticket.name}">Fancy Product</h5>
+                            <!-- Product price-->
+
+                            <div >
+                                <span>Сектор </span> <span th:text="${ticket.sector}"> price</span>
+                            </div>
+                            <span th:if="${ticket.numOfSeat}">Место </span><span th:text="${ticket.numOfSeat}"></span>
+                            <!--- <div th:text="${movie.started}"></div>-->
+                        </div>
+                    </div>
+                        <div style="margin-right: 10px">
+                            <span th:text="${ticket.movie.cost}"> price</span><span> $</span>
+                        </div>
+                        <div style="margin-right: 10px">
+                            <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto" style="margin-right: 5px" th:href="@{/payment/{ticketId}(ticketId=${ticket.id})}">Купить</a>
+                                <a class="btn btn-outline-dark mt-auto" style="margin-right: 5px" th:href="@{/movies/{movieId}(movieId=${ticket.movie.id})}">Описание</a>
+                                <a class="btn btn-outline-danger mt-auto" th:href="@{/cart/{ticketId}/delete(ticketId=${ticket.id})}">Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Product actions-->
+
+                </div>
+            </div>
+        </div>
+        <div>
+            <div th:if="${!tickets.isEmpty}">
+                <h1>Итоговая сумма: <span th:text="${sum}"></span><span>$</span></h1>
+                <a class="btn btn-outline-danger mt-auto float-end" th:href="@{/cart/delete}" >Очистить корзину</a>
+
+                <a class="btn btn-outline-dark mt-auto float-end" style="margin-right: 10px" th:href="@{/paymentAll/{cartId}(cartId=${tickets.getFirst.cart.id})}"> Купить всё </a>
+            </div>
+            <h2 align="center" th:if="${tickets.isEmpty}">
+                В корзине пусто!
+            </h2>
+        </div>
+    </div>
+
+</section>
+
+</body>
+</html>

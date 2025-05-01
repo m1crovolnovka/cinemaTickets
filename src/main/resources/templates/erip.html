@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>ЕРИП</title>
+</head>
+<body layout:fragment="body">
+<style>
+    .erip-payment-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f4f4f4;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.erip-payment-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.erip-payment-container p {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.erip-instructions {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.erip-instructions li {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+
+.erip-form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+
+.error-message {
+    display: none;
+    font-size: 12px;
+    color: red;
+    margin-top: 5px;
+}
+</style>
+<div class="erip-payment-container">
+    <h2>Оплата через ЕРИП</h2>
+    <p>Следуйте инструкциям ниже, чтобы произвести оплату:</p>
+    <ol class="erip-instructions">
+        <li>Откройте приложение вашего банка или банкомат с доступом к системе ЕРИП.</li>
+        <li>Перейдите в раздел: <strong>ЕРИП → Услуги → Интернет-магазины → Товары и услуги</strong>.</li>
+        <li>Введите код компании: <strong>123456</strong>.</li>
+        <li th:if="${ticketId}">Введите номер заказа: <strong th:text="${ticketId}"></strong>.</li>
+        <li th:if="${cartId}">Введите номер заказа: <strong th:text="${ticket.id}"></strong>.</li>
+        <li>Подтвердите сумму и завершите оплату.</li>
+    </ol>
+    <form th:if="${ticketId}" name="forma" id="payment-form" role="form" method="post" th:action="@{/erip/{ticketId}(ticketId=${ticketId})}">
+    <button type="submit" class="btn btn-dark btn-submit">Подтвердить</button>
+    </form>
+    <form th:if="${cartId}" name="forma" id="payment-form52" role="form" method="post" th:action="@{/eripAll/{cartId}(cartId=${cartId})}">
+        <button type="submit" class="btn btn-dark btn-submit">Подтвердить</button>
+    </form>
+</div>
+
+
+</body>
+
+</html>

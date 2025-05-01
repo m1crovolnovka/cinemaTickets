@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Изменение мероприятия</title>
+</head>
+<body layout:fragment="body">
+
+<section class="py-5">
+    <div class="container">
+        <form role="form" method="post" th:action="@{/movies/{movieId}/edit(movieId=${movie.id})}" th:object="${movie}">
+          <input type="hidden" th:field="*{id}">
+            <div class="container">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="title">Название</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="title"
+                                name="title"
+                                th:field="*{title}"
+                                placeholder="Название">
+                        <p th:if="${#fields.hasErrors('title')}" class="text-danger" th:errors="*{title}"></p>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="photoUrl">Ссылка на фото</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="photoUrl"
+                                name="photoUrl"
+                                th:field="*{photoUrl}"
+                                placeholder="Photo Url">
+                        <p th:if="${#fields.hasErrors('photoUrl')}" class="text-danger" th:errors="*{photoUrl}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="content" class="form-label">Описание</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="content"
+                                name="content"
+                                th:field="*{content}"
+                                placeholder="Описание">
+                        <p th:if="${#fields.hasErrors('content')}" class="text-danger" th:errors="*{content}"></p>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="started">Начало мероприятия</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="started"
+                                name="started"
+                                th:value="*{started}"
+                                placeholder="Начало">
+                        <p th:if="${#fields.hasErrors('started')}" class="text-danger" th:errors="*{started}"></p>
+                    </div>
+                    <div class="form-group col-md-6" >
+                        <label for="ticket">Место проведения:</label>
+                        <select th:field="*{place}" name="ticket"  class="form-control"  id="ticket">
+                            <option th:if="*{place == 'Дворец Республики'}" selected th:value="ДворецРеспублики">Дворец республики</option>
+                            <option th:if="!*{place == 'Дворец Республики'}"  th:value="ДворецРеспублики">Дворец республики</option>
+                            <option th:if="*{place == 'Prime Hall'}" th:value="PrimeHall" selected >Prime Hall</option>
+                            <option th:if="!*{place == 'Prime Hall'}" th:value="PrimeHall" >Prime Hall</option>
+                            <option th:if="!*{place == 'Минск-Арена'}"  th:value="Минск-Арена">Минск-Арена</option>
+                            <option th:if="*{place == 'Минск-Арена'}"  th:value="Минск-Арена" selected>Минск-Арена</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="cost">Цена билета</label>
+                        <input
+                                type="number"
+                                class="form-control"
+                                id="cost"
+                                name="cost"
+                                th:field="*{cost}"
+                                placeholder="Цена">
+                        <p th:if="${#fields.hasErrors('cost')}" class="text-danger" th:errors="*{cost}"></p>
+                    </div>
+                    <p></p>
+                <button type="submit" class="btn btn-primary">Изменить мероприятие</button>
+            </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+</body>
+
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>Кредитная карта</title>
+</head>
+<body layout:fragment="body">
+<style>
+  .payment-form-container {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .payment-form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  .error-message {
+    display: none;
+    font-size: 12px;
+    color: red;
+    margin-top: 5px;
+  }
+
+</style>
+
+
+<div class="payment-form-container">
+  <h2>Оплата кредитной картой</h2>
+  <form name="forma" id="payment-form" role="form" method="post" >
+    <div class="form-group">
+      <label for="cardNumber">Номер карты</label>
+      <input
+              type="text"
+              id="cardNumber"
+              name="cardNumber"
+              maxlength="16"
+              th:field="*{card.cardNumber}"
+              placeholder="0000 0000 0000 0000"
+      />
+      <span th:if="${#fields.hasErrors('card.cardNumber')}" th:errors="*{card.cardNumber}" class="text-danger"> Введите корректный номер карты</span>
+    </div>
+    <div class="form-group">
+      <label for="cardholderName">Имя владельца</label>
+      <input
+              type="text"
+              class="form-control"
+              id="cardholderName"
+              name="cardholderName"
+              placeholder="IVAN IVANOV"
+              th:field="*{card.cardholderName}"
+      />
+      <span th:if="${#fields.hasErrors('card.cardholderName')}" th:errors="*{card.cardholderName}" class="text-danger">Введите имя владельца</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="date">Дата истечения</label>
+        <input
+                type="month"
+                id="date"
+                name="date"
+                placeholder="MM/YY"
+                maxlength="5"
+                th:field="*{card.date}"
+        />
+        <span th:if="${#fields.hasErrors('card.date')}" th:errors="*{card.date}" class="text-danger">Введите корректную дату</span>
+      </div>
+      <div class="form-group">
+        <label for="cvv">CVV</label>
+        <input
+                type="text"
+                id="cvv"
+                name="CVV"
+                placeholder="123"
+                maxlength="3"
+                th:field="*{card.CVV}"
+        />
+        <span th:if="${#fields.hasErrors('card.CVV')}" th:errors="*{card.CVV}" class="text-danger">Введите CVV</span>
+      </div>
+    </div>
+    <button th:if="${ticketId}" th:action="@{/card/{ticketId}(ticketId=${ticketId})}" type="submit" class="btn btn-dark btn-submit">Оплатить</button>
+    <button th:if="${cartId}" th:action="@{/card/{ticketId}(ticketId=${ticketId})}" type="submit" class="btn btn-dark btn-submit">Оплатить</button>
+  </form>
+</div>
+
+</body>
+
+</html>
