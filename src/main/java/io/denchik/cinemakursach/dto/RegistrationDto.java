@@ -3,9 +3,11 @@ package io.denchik.cinemakursach.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class RegistrationDto {
     private Long id;
     @NotBlank
@@ -17,7 +19,6 @@ public class RegistrationDto {
     private String username;
     @NotBlank(message = "Название мероприятия не должно быть пустым")
     private String email;
-    private Boolean lock;
     @NotBlank
     @Size(min = 8, max = 20, message = "Пароль должен быть от 8 до 20 символов")
     @Pattern(
@@ -25,4 +26,6 @@ public class RegistrationDto {
             message = "Пароль должен содержать как минимум одну заглавную букву, одну цифру и один специальный символ (@$!%*?&)"
     )
     private String password;
+
+    private Boolean lock;
 }

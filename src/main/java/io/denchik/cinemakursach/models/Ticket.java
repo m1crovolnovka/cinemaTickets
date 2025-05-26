@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -20,16 +21,18 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date;
-    private Integer numOfSeat;
+    private LocalDate date ;
+    private LocalTime time ;
+    private Integer row;
+    private Integer col;
     private Boolean status;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private CinemaHall cinemaHall;
-    @ManyToOne
+    @ManyToOne()
     private Movie movie;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Cart cart;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Booking booking;
     @Enumerated(EnumType.STRING)
     private PaymentType payType;

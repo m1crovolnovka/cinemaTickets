@@ -1,54 +1,67 @@
-//package io.denchik.cinemakursach.controller;
-//
-//import org.kursach.zakazbiletov.kursach.dto.TicketDto;
-//import org.kursach.zakazbiletov.kursach.models.UserEntity;
-//import org.kursach.zakazbiletov.kursach.security.SecurityUtil;
-//import org.kursach.zakazbiletov.kursach.service.CartService;
-//import org.kursach.zakazbiletov.kursach.service.TicketService;
-//import org.kursach.zakazbiletov.kursach.service.UserService;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PathVariable;
-//
-//import java.util.List;
-//import java.util.Map;
-//import java.util.stream.Collectors;
-//
-//@Controller
-//public class CartController {
-//    private UserService userService;
-//    private TicketService ticketService;
-//    private CartService cartService;
-//
-//    public CartController(UserService userService, TicketService ticketService, CartService cartService) {
-//        this.userService = userService;
-//        this.ticketService = ticketService;
-//        this.cartService = cartService;
-//    }
-//
-//    @GetMapping("/cart")
-//    public String cartDetail( Model model) {
-//        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-//        List<TicketDto> tickets=ticketService.findTicketsByCartId(user.getCart().getId());
-//        Double sum = 0.0;
-//        if(tickets.size()!=0){
-//            sum = tickets.stream().mapToDouble(loc -> loc.getMovie().getCost()).sum();
-//        }
-//        model.addAttribute("sum",sum);
-//        model.addAttribute("tickets", tickets);
-//        return "cart-list";
-//    }
-//    @GetMapping("/cart/{ticketId}/delete")
-//    public String deleteMovie(@PathVariable("ticketId") Long ticketId) {
-//        cartService.delete(ticketId);
-//        return "redirect:/cart";
-//    }
-//    @GetMapping("/cart/delete")
-//    public String deleteALLMovie() {
-//        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-//        cartService.deleteAll(user.getCart().getId());
-//        return "redirect:/cart";
-//    }
-//
-//}
+package io.denchik.cinemakursach.controller;
+
+
+import io.denchik.cinemakursach.dto.TicketDto;
+import io.denchik.cinemakursach.models.UserEntity;
+import io.denchik.cinemakursach.security.SecurityUtil;
+import io.denchik.cinemakursach.service.CartService;
+import io.denchik.cinemakursach.service.TicketService;
+import io.denchik.cinemakursach.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@CrossOrigin("*")
+@RestController
+@RequestMapping()
+public class CartController {
+    private final UserService userService;
+    private final TicketService ticketService;
+    private final CartService cartService;
+
+    public CartController(UserService userService, TicketService ticketService, CartService cartService) {
+        this.userService = userService;
+        this.ticketService = ticketService;
+        this.cartService = cartService;
+    }
+
+    @PostMapping("/cart/{ticketId}")
+    public ResponseEntity<String> addTicketToCart(@PathVariable("ticketId") Long ticketId) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        System.out.println(user.getCart().getId());
+        cartService.addTicketToCart(user.getCart().getId(), ticketId);
+        return ResponseEntity.ok("Вы добавили билет");
+    }
+
+    @PostMapping("/cart/delete/{ticketId}")
+    public ResponseEntity<String> deleteTicketFromCart(@PathVariable("ticketId") Long ticketId) {
+        cartService.delete(ticketId);
+        return ResponseEntity.ok("Вы удалили билет");
+    }
+
+
+    @GetMapping("/cart")
+    public ResponseEntity<List<TicketDto>> cartDetail() {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        List<TicketDto> tickets = ticketService.findTicketsByCartId(user.getCart().getId());
+        return ResponseEntity.ok(tickets);
+    }
+
+    @PostMapping("/cart/delete")
+    public ResponseEntity<String> clearCart() {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        cartService.deleteAll(user.getCart().getId());
+        return ResponseEntity.ok("Данные из корзины успешно удалены");
+    }
+
+    @GetMapping("/cart/getId")
+    public ResponseEntity<Long> getCartId() {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        Long cartId = user.getCart().getId();
+        return ResponseEntity.ok(cartId);
+    }
+
+
+}

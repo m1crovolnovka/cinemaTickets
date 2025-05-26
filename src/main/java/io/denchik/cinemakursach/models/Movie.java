@@ -29,6 +29,10 @@ public class Movie {
 
     private Double cost;
 
+    private Integer duration;
+
+    private String videoId;
+
     @OneToMany(mappedBy = "movie",cascade = CascadeType.REMOVE)
     private List<Ticket> tickets = new ArrayList<>();
 }

@@ -24,7 +24,8 @@ public class CinemaHall {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Integer countOfSeat;
-    @OneToMany(mappedBy = "cinemaHall",cascade = CascadeType.REMOVE)
+    private Integer row;
+    private Integer col;
+    @OneToMany(mappedBy = "cinemaHall",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Ticket> tickets = new ArrayList<>();
 }

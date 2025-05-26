@@ -1,6 +1,8 @@
 package io.denchik.cinemakursach.service.impl;
 
 import io.denchik.cinemakursach.dto.MovieDto;
+import io.denchik.cinemakursach.dto.SearchDto;
+import io.denchik.cinemakursach.mapper.CinemaHallMapper;
 import io.denchik.cinemakursach.mapper.MovieMapper;
 import io.denchik.cinemakursach.models.Movie;
 import io.denchik.cinemakursach.models.Ticket;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,17 +38,13 @@ public class MovieServiceImpl implements MovieService {
         //this.ticketService = ticketService;
     }
 
+
     @Override
     public List<MovieDto> findAllMovies() {
         List<Movie> movies = movieRepository.findAll();
         return movies.stream().map(MovieMapper::mapToMovieDto).collect(Collectors.toList());
     }
 
-    @Override
-    public Movie saveMovie(MovieDto movieDto) {
-        Movie movie = mapToMovie(movieDto);
-        return movieRepository.save(movie);
-    }
 
     @Override
     public MovieDto createMovie(MovieDto movieDto) {
@@ -60,19 +60,17 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public void updateMovie(MovieDto movieDto) {
-        Movie oldMovie = movieRepository.findById(movieDto.getId()).get();
-        Movie movie = mapToMovie(movieDto);
-//        if (oldMovie.getPlace().equals(movie.getPlace())) {
-//            movieRepository.save(movie);
-//        }
-//        else{
-//            List<Ticket> tickets = oldMovie.getTickets();
-//            ticketRepository.deleteAll(tickets);
-//            movieRepository.save(movie);
-//            ticketService.createTicket(movie.getId());
-//        }
+    public MovieDto updateMovie(Long movieId,MovieDto movieDto) {
+        Movie oldMovie = movieRepository.findById(movieId).orElseThrow();
+        oldMovie.setTitle(movieDto.getTitle());
+        oldMovie.setContent(movieDto.getContent());
+        oldMovie.setPhotoUrl(movieDto.getPhotoUrl());
+        oldMovie.setDuration(movieDto.getDuration());
+        oldMovie.setCost(movieDto.getCost());
+        oldMovie.setVideoId(movieDto.getVideoId());
+        Movie updatedMovie = movieRepository.save(oldMovie);
 
+    return mapToMovieDto(updatedMovie);
     }
 
     @Override
@@ -81,31 +79,25 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public List<MovieDto> searchMovies(String query) {
+    public List<SearchDto> searchMovies(String query) {
         List<Movie> movies = movieRepository.searchMovies(query);
-        return movies.stream().map(MovieMapper::mapToMovieDto).collect(Collectors.toList());
+        List<SearchDto> searchDtos = new ArrayList<>();
+        for(Movie movie: movies){
+            for(Ticket ticket : ticketRepository.searchCinoSession(movie.getId())){
+                SearchDto searchDto = new SearchDto();
+                searchDto.setId(ticket.getId());
+                searchDto.setMovieId(movie.getId());
+                searchDto.setCost(movie.getCost());
+                searchDto.setName(movie.getTitle());
+                searchDto.setDateTime(LocalDateTime.of(ticket.getDate(),ticket.getTime()));
+                searchDto.setCinemaHall(CinemaHallMapper.mapToCinemaHallDto(ticket.getCinemaHall()));
+                searchDto.setPhotoUrl(movie.getPhotoUrl());
+                searchDtos.add(searchDto);
+            }
+        }
+        return searchDtos;
     }
 
-    @Override
-    public List<MovieDto> searchMoviesByFilters(String query, String ticket, LocalDate movieDateBefore, LocalDate movieDateAfter, Double minPrice, Double maxPrice, String sort) {
-        List<Movie> movies = movieRepository.searchMovies(query);
-//        if (!ticket.equals(""))
-//            movies = movies.stream().filter(movie -> movie.getPlace().equals(ticket)).collect(Collectors.toList());
-//        if (movieDateBefore != null)
-//            movies = movies.stream().filter(movie -> movie.getStarted().isAfter(movieDateBefore)).collect(Collectors.toList());
-//        if (movieDateAfter != null)
-//            movies = movies.stream().filter(movie -> movie.getStarted().isBefore(movieDateAfter)).collect(Collectors.toList());
-//        movies = movies.stream().filter(movie -> movie.getCost() >= minPrice).collect(Collectors.toList());
-//        movies = movies.stream().filter(movie -> movie.getCost() <= maxPrice).collect(Collectors.toList());
-//        if (sort.equals("dateIcs"))
-//            movies = movies.stream().sorted(Comparator.comparing(Movie::getStarted)).collect(Collectors.toList());
-//        if (sort.equals("dateDcs"))
-//            movies = movies.stream().sorted(Comparator.comparing(Movie::getStarted).reversed()).collect(Collectors.toList());
-//        if (sort.equals("priceIcs"))
-//            movies = movies.stream().sorted(Comparator.comparing(Movie::getCost)).collect(Collectors.toList());
-//        if (sort.equals("priceDcs"))
-//            movies = movies.stream().sorted(Comparator.comparing(Movie::getCost).reversed()).collect(Collectors.toList());
-        return movies.stream().map(MovieMapper::mapToMovieDto).collect(Collectors.toList());
-    }
+
 
 }

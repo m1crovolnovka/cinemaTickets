@@ -21,7 +21,7 @@ public class CinemaHallDto {
     private Long id;
     @NotEmpty(message = "Название не может быть пустым")
     private String name;
-    @NotEmpty(message = "Номер места не может быть пустым")
-    private Integer countOfSeat;
+    private Integer row;
+    private Integer col;
 
 }

@@ -22,5 +22,8 @@ public class MovieDto {
     private String content;
     @NotNull(message = "Цена не должна быть пустая")
     private Double cost;
-    private List<Ticket> tickets;
+    @NotNull(message = "Продолжительность фильма не должна быть пустая")
+    private Integer duration;
+    private String videoId;
+
 }

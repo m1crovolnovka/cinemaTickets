@@ -9,14 +9,18 @@ import java.util.List;
 public interface UserService {
     void saveUser(RegistrationDto registrationDto);
 
-    UserEntity findByEmail(@NotEmpty String email);
+    UserEntity findByEmail(String email);
 
     UserEntity findByUsername(@NotEmpty String username);
 
     UserEntity findById(@NotEmpty Long id);
 
-    List<UserEntity> findAllCommonUsers();
+    List<RegistrationDto> findAllCommonUsers();
+
+    void addAdmin(Long userId);
 
     void deleteUserById(@NotEmpty Long id);
+
+    boolean authenticate(String username, String password);
 
 }

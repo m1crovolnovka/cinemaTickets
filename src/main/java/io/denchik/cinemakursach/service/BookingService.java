@@ -8,5 +8,4 @@ import org.springframework.validation.BindingResult;
 public interface BookingService {
     boolean validateNumber(Long num);
     void deleteBooking(Long ticketId);
-    String validCard(CardDto card, BindingResult bindingResult, Model model);
 }

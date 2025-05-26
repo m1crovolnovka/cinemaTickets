@@ -13,7 +13,8 @@ public class MovieMapper {
                 .content(movieDto.getContent())
                 .cost(movieDto.getCost())
                 .photoUrl(movieDto.getPhotoUrl())
-                .tickets(movieDto.getTickets())
+                .duration(movieDto.getDuration())
+                .videoId(movieDto.getVideoId())
                 .build();
         return movie;
     }
@@ -25,7 +26,8 @@ public class MovieMapper {
                 .content(movie.getContent())
                 .cost(movie.getCost())
                 .photoUrl(movie.getPhotoUrl())
-                .tickets(movie.getTickets())
+                .duration(movie.getDuration())
+                .videoId(movie.getVideoId())
                 .build();
         return movieDto;
     }

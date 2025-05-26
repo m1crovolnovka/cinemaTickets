@@ -1,119 +1,79 @@
-//package io.denchik.cinemakursach.controller;
-//
-//import org.kursach.zakazbiletov.kursach.dto.MovieDto;
-//import org.kursach.zakazbiletov.kursach.dto.TicketDto;
-//import org.kursach.zakazbiletov.kursach.models.Ticket;
-//import org.kursach.zakazbiletov.kursach.models.UserEntity;
-//import org.kursach.zakazbiletov.kursach.repository.TicketRepository;
-//import org.kursach.zakazbiletov.kursach.security.SecurityUtil;
-//import org.kursach.zakazbiletov.kursach.service.MovieService;
-//import org.kursach.zakazbiletov.kursach.service.TicketService;
-//import org.kursach.zakazbiletov.kursach.service.UserService;
-//import org.kursach.zakazbiletov.kursach.service.impl.CartServiceImpl;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.Comparator;
-//import java.util.List;
-//import java.util.Set;
-//import java.util.stream.Collectors;
-//
-//@Controller
-//public class TicketController {
-//
-//    private TicketService ticketService;
-//    private UserService userService;
-//    private MovieService movieService;
-//
-//    @Autowired
-//    public TicketController(TicketService ticketService, UserService userService, MovieService movieService) {
-//        this.userService = userService;
-//        this.ticketService = ticketService;
-//        this.movieService = movieService;
-//
-//    }
-//
-//
-//    @GetMapping("/tickets/{movieId}/new")
-//    public String createTicketForm(@PathVariable("movieId") Long movieId, Model model) {
-//        Ticket ticket = new Ticket();
-//        model.addAttribute("movieId", movieId);
-//        model.addAttribute("ticket", ticket);
-//        return "tickets-create";
-//    }
-//
-//    @GetMapping("/movies/{movieId}/tickets")
-//    public String movieDetail(@PathVariable("movieId") Long movieId, Model model) {
-//        List<TicketDto> tickets = ticketService.findTicketsByMovieId(movieId);
-//        Set<String> sectors = tickets.stream().map(TicketDto::getSector).collect(Collectors.toSet());
-//        for (String sec : sectors)
-//            model.addAttribute(sec, tickets.stream().filter(loc -> loc.getSector().equals(sec)).anyMatch(loc -> loc.getStatus().equals(true)));
-//        MovieDto movieDto = movieService.findMovieById(movieId);
-//        model.addAttribute("movie", movieDto);
-//        if (tickets.getFirst().getName().equals("Prime Hall")) {
-//            return "tickets/Prime_Hall";
-//        }
-//        if (tickets.getFirst().getName().equals("Минск-Арена")) {
-//            return "tickets/Minsk-Arena";
-//        } else {
-//            return "redirect:/movies/" + movieId + "/tickets/" + tickets.getFirst().getSector();
-//        }
-//    }
-//
-//    @GetMapping("/movies/{movieId}/tickets/{sector}")
-//    public String movieDetailSector(@PathVariable("movieId") Long movieId, @PathVariable("sector") String sector, Model model) {
-//        List<TicketDto> tickets = ticketService.findTicketsByMovieId(movieId).stream().filter(loc -> loc.getSector().equals(sector)).collect(Collectors.toList());
-//        MovieDto movieDto = movieService.findMovieById(movieId);
-//        model.addAttribute("movie", movieDto);
-//        if (tickets.getFirst().getName().equals("Prime Hall")) {
-//            switch (sector) {
-//                case "Balcony1", "Balcony2":
-//                    tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//                    model.addAttribute("tickets", tickets);
-//                    return "tickets/Prime_Hall_Balcony1";
-//                case "Balcony3":
-//                    tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//                    model.addAttribute("tickets", tickets);
-//                    return "tickets/Prima_Hall_Balcony3";
-//                case "Dancefloor":
-//                    Long ticketId = tickets.stream().filter(loc -> loc.getStatus().equals(true)).findFirst().get().getId();
-//                    return "redirect:/movies/{movieId}/tickets/Dancefloor/" + ticketId;
-//            }
-//        }
-//        if (tickets.getFirst().getName().equals("Минск-Арена")) {
-//            switch (sector) {
-//                case "Sector1", "Sector3":
-//                    tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//                    model.addAttribute("tickets", tickets);
-//                    return "tickets/Minsk-Arena_Sector13";
-//                case "Sector2":
-//                    tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//                    model.addAttribute("tickets", tickets);
-//                    return "tickets/Minsk-Arena_Sector2";
-//                case "Balcony1", "Balcony2":
-//                    tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//                    model.addAttribute("tickets", tickets);
-//                    return "tickets/Minsk-Arena_Balcony12";
-//            }
-//        }
-//        if (tickets.getFirst().getName().equals("Дворец Республики"))  {
-//            tickets = tickets.stream().sorted(Comparator.comparing(TicketDto::getNumOfSeat)).collect(Collectors.toList());
-//            model.addAttribute("tickets", tickets);
-//            return "tickets/Palace_of_the_Republic";
-//        }
-//        return "redirect:/movies/" + movieId + "/tickets";
-//    }
-//
-//
-//    @GetMapping("/movies/{movieId}/tickets/{sector}/{ticketId}")
-//    public String addToCart(@PathVariable("ticketId") Long ticketId) {
-//        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-//        TicketDto ticketDto = ticketService.findTicketsById( ticketId);
-//        ticketService.updateTicket(ticketDto);
-//        ticketService.addTicketToCart(user.getCart().getId(), ticketId);
-//        return "redirect:/cart";
-//    }
-//
-//}
+package io.denchik.cinemakursach.controller;
+
+
+import io.denchik.cinemakursach.dto.CinemaHallStatDto;
+import io.denchik.cinemakursach.dto.DateRequestDto;
+import io.denchik.cinemakursach.dto.MovieStatDto;
+import io.denchik.cinemakursach.dto.TicketDto;
+import io.denchik.cinemakursach.service.MovieService;
+import io.denchik.cinemakursach.service.TicketService;
+import io.denchik.cinemakursach.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+@CrossOrigin("*")
+@RestController
+@RequestMapping()
+public class TicketController {
+
+    private TicketService ticketService;
+    private UserService userService;
+    private MovieService movieService;
+
+
+    @Autowired
+    public TicketController(TicketService ticketService, UserService userService, MovieService movieService) {
+        this.userService = userService;
+        this.ticketService = ticketService;
+        this.movieService = movieService;
+
+    }
+
+
+    @PostMapping("/tickets/new")
+    public void addShedule(@RequestBody DateRequestDto request) {
+        System.out.println(LocalDate.parse(request.getFullDate(), DateTimeFormatter.ISO_DATE_TIME).plusDays(1));
+        ticketService.createShedule(LocalDate.parse(request.getFullDate(), DateTimeFormatter.ISO_DATE_TIME).plusDays(1));
+    }
+
+
+    @PutMapping("/tickets/movie/{movieId}")
+    public ResponseEntity<List<TicketDto>> ticketsForMovieByDate(@PathVariable("movieId") Long movieId,@RequestBody DateRequestDto request) {
+        LocalDate date = LocalDateTime.parse(request.getFullDate(), DateTimeFormatter.ISO_DATE_TIME).plusHours(3).toLocalDate();
+        System.out.println(date);
+        List<TicketDto> ticketDto = ticketService.findTicketsByMovieIdAndDate(movieId,date);
+        return ResponseEntity.ok(ticketDto);
+    }
+
+    @GetMapping("/tickets/dates")
+    public ResponseEntity<List<DateRequestDto>> ticketsDates() {
+        List<DateRequestDto> ticketDto = ticketService.findAllTicketDates();
+        return ResponseEntity.ok(ticketDto);
+    }
+
+    @PutMapping("/tickets/chooseMenu")
+    public ResponseEntity<List<TicketDto>> ticketsForChooseMenu(@RequestBody DateRequestDto request) {
+        List<TicketDto> ticketDto = ticketService.findAllTicketDatesTime(LocalDateTime.parse(request.getFullDate(), DateTimeFormatter.ISO_DATE_TIME));
+        return ResponseEntity.ok(ticketDto);
+    }
+
+    @GetMapping("/tickets/moviesStat")
+    public ResponseEntity<List<MovieStatDto>> ticketsForMoviesStat() {
+        List<MovieStatDto> ticketDto = ticketService.findAllMovieStat();
+        return ResponseEntity.ok(ticketDto);
+    }
+
+    @GetMapping("/tickets/cinemaHallStat")
+    public ResponseEntity<List<CinemaHallStatDto>> ticketsForCinemaHallStat() {
+        List<CinemaHallStatDto> ticketDto = ticketService.findAllCinemaHallStat();
+        return ResponseEntity.ok(ticketDto);
+    }
+
+
+}

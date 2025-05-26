@@ -1,118 +1,128 @@
 package io.denchik.cinemakursach.controller;
 
+import io.denchik.cinemakursach.dto.LoginDto;
 import io.denchik.cinemakursach.dto.RegistrationDto;
+import io.denchik.cinemakursach.mapper.UserMapper;
+import io.denchik.cinemakursach.models.Role;
 import io.denchik.cinemakursach.models.UserEntity;
+import io.denchik.cinemakursach.repository.RoleRepository;
 import io.denchik.cinemakursach.repository.UserRepository;
 import io.denchik.cinemakursach.security.SecurityUtil;
 import io.denchik.cinemakursach.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import java.security.Principal;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+
+
+@CrossOrigin("*")
+@RestController
+@RequestMapping()
 public class AuthController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    public AuthController(UserService userService, UserRepository userRepository , PasswordEncoder passwordEncoder) {
+    private final RoleRepository roleRepository;
+
+    public AuthController(UserService userService, UserRepository userRepository , PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
-
-    @GetMapping("/profile")
-    public String profile(Model model) {
-        String username = SecurityUtil.getSessionUser();
-        UserEntity user = userService.findByUsername(username);
-        model.addAttribute("user", user);
-        return "profile";
-    }
-
-    @PostMapping("/profile/username")
-    public String changeUsername(@RequestParam(value="username") String username, Principal principal) {
-        UserEntity currentUser = userService.findByUsername(principal.getName());
-        if (currentUser == null) {
-            return "redirect:/profile?fail";
-        }
-        if (!username.equals(currentUser.getUsername()) && userService.findByUsername(username) != null) {
-            return "redirect:/profile?fail";
-        }
-        currentUser.setUsername(username);
-        userRepository.save(currentUser);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                currentUser, authentication.getCredentials(), authentication.getAuthorities()));
-        return "redirect:/profile?success";
-    }
-    @PostMapping("/profile/email")
-    public String changeEmail(@RequestParam(value="email") String email, Principal principal) {
-        UserEntity currentUser = userService.findByUsername(principal.getName());
-        if (currentUser == null) {
-            return "redirect:/profile?fail";
-        }
-        if (!email.equals(currentUser.getEmail()) && userService.findByEmail(email) != null) {
-            return "redirect:/profile?fail";
-        }
-        currentUser.setEmail(email);
-        userRepository.save(currentUser);
-        return "redirect:/profile?success";
-    }
-
-    @PostMapping("/profile/password")
-    public String changePassword(@RequestParam(value="password1") String password1,@RequestParam(value="password2") String password2,Principal principal) {
-        UserEntity currentUser = userService.findByUsername(principal.getName());
-        if (currentUser == null) {
-            return "redirect:/profile?fail";
-        }
-        if (!password1.equals(password2)) {
-            return "redirect:/profile?fail";
-        }
-        currentUser.setPassword(passwordEncoder.encode(password1));
-        userRepository.save(currentUser);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                currentUser, authentication.getCredentials(), authentication.getAuthorities()));
-        return "redirect:/profile?success";
-    }
 
     @PostMapping("/register/save")
-    public String register(@Valid @ModelAttribute("user") RegistrationDto user, BindingResult result, Model model) {
+    public ResponseEntity<RegistrationDto> register(@RequestBody() RegistrationDto user ) {
         UserEntity existingUserEmail = userService.findByEmail(user.getEmail());
         if (existingUserEmail != null && existingUserEmail.getEmail()!= null && !existingUserEmail.getEmail().isEmpty()) {
-            result.rejectValue("email","error.user","Этот email уже зарегистрирован");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(user);
         }
         UserEntity existingUserUsername = userService.findByUsername(user.getUsername());
         if (existingUserUsername != null && existingUserUsername.getUsername()!= null && !existingUserUsername.getUsername().isEmpty()) {
-            result.rejectValue("username","error.user","Это имя пользователя уже используется");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(user);
         }
-        if(result.hasErrors()) {
-            model.addAttribute("user", user);
-            return "register";
-        }
-        userService.saveUser(user);
-        return "redirect:/login?username=";
+         userService.saveUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
-    @GetMapping("/register")
-    public String getRegisterForm(Model model) {
-        RegistrationDto user = new RegistrationDto();
-        model.addAttribute("user", user);
-        return "register";
+
+    @PutMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto, HttpSession session) {
+        try{
+            boolean isAuthenticated = userService.authenticate(loginDto.getUsername(), loginDto.getPassword());
+
+            if(isAuthenticated) {
+                session.setAttribute("user", loginDto.getUsername());
+                UserEntity currentUser = userService.findByUsername(loginDto.getUsername());
+                Role role = roleRepository.findByName("ADMIN");
+                if(currentUser.getRoles().contains(role)) {
+                    return ResponseEntity.ok("ADMIN");
+                }
+                else{
+                    return ResponseEntity.ok("USER");
+                }
+
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неправильное имя пользователя или пароль");
+            }
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла неизвестная ошибка");
+        }
     }
+
+
+    @GetMapping("/profile")
+    public ResponseEntity<RegistrationDto> profileUser() {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        RegistrationDto registrationDto = UserMapper.mapToRegistrationDto(currentUser);
+        return ResponseEntity.ok(registrationDto);
+    }
+
+
+    @PostMapping("/profile/username")
+    public ResponseEntity<String> changeUsernameAtAdmin(@RequestBody() String username ) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        username = username.replaceAll("^\"|\"$", "");
+        if (!username.equals(currentUser.getUsername()) && userService.findByUsername(username) != null) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Такой пользователь уже существует");
+        }
+        currentUser.setUsername(username);
+        userRepository.save(currentUser);
+        return ResponseEntity.ok("Имя пользователя успешно изменено");
+    }
+    @PostMapping("/profile/email")
+    public ResponseEntity<String> changeEmailAtAdmin(@RequestBody() String email ) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        email = email.replaceAll("^\"|\"$", "");
+        if (!email.equals(currentUser.getEmail()) && userService.findByEmail(email) != null) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Пользователь с таким email уже существует");
+        }
+        currentUser.setEmail(email);
+        userRepository.save(currentUser);
+        return ResponseEntity.ok("Email успешно изменен");
+    }
+
+    @PostMapping("/profile/password")
+    public ResponseEntity<String> changePassword(@RequestBody() String password ) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        password = password.replaceAll("^\"|\"$", "");
+        currentUser.setPassword(passwordEncoder.encode(password));
+        userRepository.save(currentUser);
+        return ResponseEntity.ok("Пароль успешно изменен");
+                }
+
+    @PostMapping("/profile/delete")
+    public ResponseEntity<String> delete() {
+        Long currentUserId = userService.findByUsername(SecurityUtil.getSessionUser()).getId();
+        userService.deleteUserById(currentUserId);
+        return ResponseEntity.ok("Пользователь успешно удален");
+    }
+
+
 }

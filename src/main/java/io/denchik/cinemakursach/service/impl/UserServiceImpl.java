@@ -2,14 +2,19 @@ package io.denchik.cinemakursach.service.impl;
 
 
 import io.denchik.cinemakursach.dto.RegistrationDto;
+import io.denchik.cinemakursach.mapper.UserMapper;
 import io.denchik.cinemakursach.models.Role;
 import io.denchik.cinemakursach.models.Ticket;
 import io.denchik.cinemakursach.models.UserEntity;
 import io.denchik.cinemakursach.repository.*;
 import io.denchik.cinemakursach.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private TicketRepository ticketRepository;
     private final CartRepository cartRepository;
     private final BookingRepository bookingRepository;
+    private PasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, TicketRepository ticketRepository, CartRepository cartRepository, BookingRepository bookingRepository) {
@@ -65,10 +71,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserEntity> findAllCommonUsers() {
+    public List<RegistrationDto> findAllCommonUsers() {
         List<UserEntity> users = userRepository.findAll();
         Role admin = roleRepository.findByName("ADMIN");
-        return users.stream().filter(userEntity -> !userEntity.getRoles().contains(admin)).sorted(Comparator.comparing(UserEntity::getUsername)).collect(Collectors.toList());
+        return users.stream().filter(userEntity -> !userEntity.getRoles().contains(admin)).map(UserMapper::mapToRegistrationDto).sorted(Comparator.comparing(RegistrationDto::getUsername)).collect(Collectors.toList());
     }
 
     @Override
@@ -76,16 +82,44 @@ public class UserServiceImpl implements UserService {
         UserEntity user = findById(id);
         user.setRoles(null);
         for(Ticket loc : user.getCart().getTickets()){
-            loc.setStatus(true);
+            loc.setCart(null);
+            loc.setStatus(false);
             loc.setPayType(null);
             ticketRepository.save(loc);
             }
        for(Ticket loc : user.getBooking().getTickets()){
-           loc.setStatus(true);
+           loc.setBooking(null);
+           loc.setStatus(false);
            loc.setPayType(null);
            ticketRepository.save(loc);
        }
         userRepository.save(user);
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void addAdmin(Long userId) {
+            UserEntity user = findById(userId);
+            Role adminRole = roleRepository.findByName("ADMIN");
+            List<Role> roles = user.getRoles();
+            roles.add(adminRole);
+            user.setRoles(roles);
+            userRepository.save(user);
+    }
+
+    public boolean authenticate(String username, String password) {
+        UserEntity user = userRepository.findUserByUsername(username);
+
+        if(!user.getUsername().equals(username)){
+            throw new UsernameNotFoundException("Пользователь с таким именем отсутствует");
+        }
+        if(!bCryptPasswordEncoder.matches(password, user.getPassword())){
+            throw new BadCredentialsException("Пароль не верный");
+        }
+        if(user.getLock()){
+            throw new BadCredentialsException("Пользователь заблокирован");
+        }
+
+        return true;
     }
 }
