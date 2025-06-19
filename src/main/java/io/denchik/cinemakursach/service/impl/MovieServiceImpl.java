@@ -28,14 +28,13 @@ import static io.denchik.cinemakursach.mapper.MovieMapper.mapToMovieDto;
 @Service
 public class MovieServiceImpl implements MovieService {
     private final TicketRepository ticketRepository;
-   // private final TicketService ticketService;
     private MovieRepository movieRepository;
 
     @Autowired
-    public MovieServiceImpl(MovieRepository movieRepository, TicketRepository ticketRepository/*, TicketService ticketService*/) {
+    public MovieServiceImpl(MovieRepository movieRepository, TicketRepository ticketRepository) {
         this.movieRepository = movieRepository;
         this.ticketRepository = ticketRepository;
-        //this.ticketService = ticketService;
+
     }
 
 

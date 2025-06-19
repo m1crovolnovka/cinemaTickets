@@ -74,6 +74,4 @@ public class TicketController {
         List<CinemaHallStatDto> ticketDto = ticketService.findAllCinemaHallStat();
         return ResponseEntity.ok(ticketDto);
     }
-
-
 }

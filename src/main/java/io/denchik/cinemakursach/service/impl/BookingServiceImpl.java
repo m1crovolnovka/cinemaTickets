@@ -18,23 +18,6 @@ public class BookingServiceImpl implements BookingService {
     public BookingServiceImpl(TicketRepository ticketRepository) {
         this.ticketRepository = ticketRepository;
     }
-    public boolean validateNumber(Long num){
-        String number = String.valueOf(num);
-        int sum = 0;
-        boolean alternateDigit = false;
-        for(int i = number.length()-1; i >= 0; i--){
-            int digit = Integer.parseInt(number.substring(i, i+1));
-            if(alternateDigit){
-                digit *= 2;
-                if(digit > 9){
-                    digit = 1 + (digit % 10);
-                }
-            }
-            sum += digit;
-            alternateDigit = !alternateDigit;
-        }
-        return (sum % 10 == 0);
-    }
 
     @Override
     public void deleteBooking(Long ticketId) {

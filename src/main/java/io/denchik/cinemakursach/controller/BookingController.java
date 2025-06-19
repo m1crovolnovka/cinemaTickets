@@ -30,7 +30,8 @@ public class BookingController {
     @PostMapping("/orders/{ticketId}")
     public ResponseEntity<String> addOrder(@PathVariable("ticketId") Long ticketId, @RequestBody String string) {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-        if(string.equals("CREDIT_CARD")) {
+        System.out.println(string);
+        if(string.equals("\"CREDIT_CARD\"")) {
             ticketService.addTicketToBooking(user.getBooking().getId(), ticketId, PaymentType.CREDIT_CARD);
         }
         else{

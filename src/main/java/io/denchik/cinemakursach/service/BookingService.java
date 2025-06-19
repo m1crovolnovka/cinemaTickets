@@ -6,6 +6,5 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 public interface BookingService {
-    boolean validateNumber(Long num);
     void deleteBooking(Long ticketId);
 }
